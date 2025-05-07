@@ -47,14 +47,14 @@ jobs:
 
     - name: Upload SpotBugs report
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: spotbugs-report
         path: simple-token-validator/target/spotbugsXml.xml # Path is relative to repo root
 
     - name: Upload Dependency-Check report
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: dependency-check-report
         path: simple-token-validator/target/dependency-check-report.html # Path is relative to repo root
