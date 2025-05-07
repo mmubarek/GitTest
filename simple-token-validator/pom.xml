@@ -51,6 +51,7 @@
                 </configuration>
             </plugin>
 
+                  
             <!-- SpotBugs with FindSecurityBugs for SAST -->
             <plugin>
                 <groupId>com.github.spotbugs</groupId>
@@ -59,7 +60,14 @@
                 <configuration>
                     <effort>Max</effort>
                     <threshold>Low</threshold>
-                    <failOnError>true</failOnError> <!-- Set to false if you want build to pass despite findings -->
+                    <!--
+                        CHANGE THIS LINE:
+                        From: <failOnError>true</failOnError>
+                        To:   <failOnError>false</failOnError>
+                    -->
+                    <failOnError>false</failOnError>
+                    <xmlOutput>true</xmlOutput> <!-- Ensure XML output is explicitly enabled -->
+                    <xmlOutputDirectory>target</xmlOutputDirectory> <!-- Default, but good to be explicit -->
                     <plugins>
                         <plugin>
                             <groupId>com.h3xstream.findsecbugs</groupId>
@@ -71,12 +79,13 @@
                 <executions>
                     <execution>
                         <goals>
-                            <goal>check</goal> <!-- 'check' goal integrates into verify phase -->
+                            <goal>check</goal> <!-- 'check' goal also implies 'spotbugs' goal which generates report -->
                         </goals>
                     </execution>
                 </executions>
             </plugin>
 
+    
             <!-- OWASP Dependency-Check for vulnerable dependencies (SCA) -->
             <plugin>
                 <groupId>org.owasp</groupId>

@@ -36,35 +36,33 @@ pipeline {
                 }
             }
         }
-
+        
+        // Jenkinsfile (SAST Stage)
         stage('SAST (SpotBugs)') {
             steps {
                 dir(env.PROJECT_DIR) {
-                    // SpotBugs check is part of the 'verify' phase in pom.xml,
-                    // or can be run explicitly.
-                    // We use '|| true' to let Jenkins control build failure via post-processing,
-                    // rather than Maven failing the 'sh' step immediately.
+                    // Maven will now complete this step and generate the report,
+                    // even if SpotBugs finds issues, due to failOnError=false in pom.xml.
+                    // The '|| true' is less critical now but harmless.
                     sh 'mvn -B spotbugs:check || true'
                 }
             }
             post {
                 always {
-                    // Use Warnings NG Plugin to record SpotBugs issues
                     recordIssues(
                         tools: [spotBugs(pattern: "${env.PROJECT_DIR}/target/spotbugsXml.xml")],
-                        // You can configure quality gates in Jenkins or use failOnError here
-                        // failOnError: true // Jenkins will fail the build based on Warnings NG thresholds/config
-                        // The pom.xml already has <failOnError>true</failOnError> for SpotBugs,
-                        // so Maven will likely fail the 'sh' step above if this is not handled.
-                        // If Maven's failOnError is true, the '|| true' is crucial.
-                        // If you want Jenkins to solely decide, set failOnError to false in pom.xml for SpotBugs.
-                        // For this demo, let's assume pom.xml's failOnError handles it,
-                        // but Jenkins will still record and display.
-                        // If the 'sh' step fails due to SpotBugs, this post action might not fully execute
-                        // in some pipeline configurations unless error handling is more robust.
-                        // A better approach might be to have Maven *not* fail the build, and let Jenkins decide.
-                        // For now, let's keep it simple.
-                        // If SpotBugs fails the mvn command, the build will be marked as failed by Maven.
+                        // Let Jenkins decide the build status based on the report:
+                        qualityGates: [
+                            // Example: 1 or more HIGH severity SpotBugs issues makes the build UNSTABLE
+                            [threshold: 1, type: 'TOTAL_HIGH', unstable: true],
+                            // Example: 1 or more ERROR severity SpotBugs issues FAILS the build
+                            // (SpotBugs severities are often mapped to ERROR, HIGH, NORMAL, LOW by Warnings NG)
+                            [threshold: 1, type: 'TOTAL_ERROR', failing: true], // Check how FindSecBugs severities are mapped in WarningsNG
+                            // You might need to adjust 'type' based on how SpotBugs/FindSecBugs severities
+                            // are categorized by the Warnings NG plugin (e.g., ERROR, WARNING_HIGH, etc.)
+                            // Consult Warnings NG documentation or experiment.
+                            // For FindSecurityBugs, its "high" issues are often treated as "ERROR" or "HIGH" by Warnings NG.
+                        ]
                     )
                 }
             }
