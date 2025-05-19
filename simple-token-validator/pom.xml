@@ -10,10 +10,10 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-        <junit.jupiter.version>5.8.2</junit.jupiter.version>
-        <spotbugs.version>4.7.3.0</spotbugs.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <junit.jupiter.version>5.10.2</junit.jupiter.version>
+        <spotbugs.version>4.9.3.0</spotbugs.version>
         <findsecbugs.plugin.version>1.12.0</findsecbugs.plugin.version>
         <dependency-check.version>8.2.1</dependency-check.version>
     </properties>

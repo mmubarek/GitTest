@@ -1,4 +1,3 @@
-// src/main/java/com/example/secureapp/TokenService.java
 package com.example.secureapp;
 
 import java.nio.charset.StandardCharsets;
@@ -8,14 +7,31 @@ import java.util.Base64;
 
 public class TokenService {
 
-    private static final String SECRET_KEY = "mySuperSecretDemoKey"; // Hardcoded for demo - BAD PRACTICE!
-    private static final long DEFAULT_EXPIRY_MINUTES = 30;
+    private final String secretKey; // No longer static final
+    private final long defaultExpiryMinutes; // No longer static final
+
+    public TokenService(String secretKey, long expiryMinutes) {
+        if (secretKey == null || secretKey.trim().isEmpty()) {
+            throw new IllegalArgumentException("Secret key cannot be null or empty.");
+        }
+        if (expiryMinutes <= 0) {
+            throw new IllegalArgumentException("Expiry minutes must be positive.");
+        }
+        this.secretKey = secretKey;
+        this.defaultExpiryMinutes = expiryMinutes;
+    }
+
+    // Constructor with default expiry if only secret is provided by config
+    public TokenService(String secretKey) {
+        this(secretKey, 30); // Default to 30 minutes
+    }
+
 
     public String generateToken(String userId) {
         if (userId == null || userId.trim().isEmpty()) {
             throw new IllegalArgumentException("User ID cannot be null or empty.");
         }
-        long expiryTime = System.currentTimeMillis() + (DEFAULT_EXPIRY_MINUTES * 60 * 1000);
+        long expiryTime = System.currentTimeMillis() + (this.defaultExpiryMinutes * 60 * 1000);
         String dataToSign = userId + ":" + expiryTime;
         String signature = calculateSignature(dataToSign);
         return Base64.getEncoder().encodeToString((dataToSign + ":" + signature).getBytes(StandardCharsets.UTF_8));
@@ -57,17 +73,16 @@ public class TokenService {
         if (!expectedSignature.equals(providedSignature)) {
             throw new InvalidTokenException("Token signature is invalid.");
         }
-        // Potentially log successful validation or return user ID
         System.out.println("Token validated successfully for user: " + userId);
         return true;
     }
 
-    // private
-    String calculateSignature(String data) {
+    // Changed to protected for testability from TokenServiceTest if needed, or for internal use
+    protected String calculateSignature(String data) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hashedBytes = digest.digest((data + SECRET_KEY).getBytes(StandardCharsets.UTF_8));
-            // Using hex string for simplicity, Base64 could also be used
+            // Use the instance specific secretKey
+            byte[] hashedBytes = digest.digest((data + this.secretKey).getBytes(StandardCharsets.UTF_8));
             StringBuilder hexString = new StringBuilder();
             for (byte b : hashedBytes) {
                 String hex = Integer.toHexString(0xff & b);
@@ -76,7 +91,6 @@ public class TokenService {
             }
             return hexString.toString();
         } catch (NoSuchAlgorithmException e) {
-            // This should not happen with SHA-256
             throw new RuntimeException("Could not create SHA-256 digest", e);
         }
     }
