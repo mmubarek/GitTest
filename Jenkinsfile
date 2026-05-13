@@ -3,11 +3,6 @@
 pipeline {
     agent any // Or specify a specific agent with required tools
 
-    tools {
-        maven 'Maven_3_8_X' // CRITICAL: Replace with your Maven tool name configured in Jenkins Global Tool Configuration
-        jdk 'JDK_11'       // CRITICAL: Replace with your JDK tool name configured in Jenkins Global Tool Configuration
-    }
-
     environment {
         // Define the sub-project directory for easier reference
         PROJECT_DIR = 'simple-token-validator'
@@ -25,6 +20,8 @@ pipeline {
             steps {
                 // Execute Maven commands within the sub-project directory
                 dir(env.PROJECT_DIR) {
+                    sh 'java -version'
+                    sh 'mvn -version'
                     sh 'mvn -B clean package'
                 }
             }
