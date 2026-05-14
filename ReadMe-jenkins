@@ -1,0 +1,32 @@
+## Build Docker Image
+docker build -t myjenkins .
+
+## Run myjenkins image as a container
+```bash
+docker run --name jenkins-blueocean --restart=on-failure --detach \
+  --network jenkins --env DOCKER_HOST=tcp://docker:2376 \
+  --env DOCKER_CERT_PATH=/certs/client --env DOCKER_TLS_VERIFY=1 \
+  --publish 8080:8080 --publish 50000:50000 \
+  --volume jenkins-data:/var/jenkins_home \
+  --volume jenkins-docker-certs:/certs/client:ro \
+  myjenkins
+```
+## Check Image 
+docker image ls 
+
+## Check Container
+docker container ls or docker ps -a
+docker volume ls
+
+## Reset everything 
+* **Stop/Remove jenkinscontainer**
+docker stop <jenkins_container>
+docker rm <jenkins_container>
+* **Remove volume**
+  docker volume rm jenkins-data
+  docker volume rm jenkins-docker-certs
+* **Run myjenkins again**
+  docker run ...
+
+## Getting Password for initial setup
+   docker logs jenkins-blueocean
